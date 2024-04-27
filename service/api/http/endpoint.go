@@ -27,6 +27,7 @@ func home(ctx aero.Context) error {
 
 type jsonName struct {
 	Name string `json:"name"`
+	Age  int    `json:age`
 }
 
 type response struct {
@@ -51,11 +52,24 @@ func hello(ctx aero.Context) error {
 	if err != nil {
 		return err
 	}
-	return JSON(ctx, response{Code: 0, Msg: fmt.Sprintf("Hello %s", name.Name)})
+	if name.Name != "Dat" {
+		ctx.SetStatus(404)
+		return JSON(ctx, response{Code: 0, Msg: fmt.Sprintf("Not found %s", name.Name)})
+	}
+	return JSON(ctx, response{Code: 0, Msg: fmt.Sprintf("Hello %s age %d", name.Name, name.Age)})
+}
+
+func getHello(ctx aero.Context) error {
+
+	return JSON(ctx, response{Code: 0, Msg: fmt.Sprintf("Hello")})
 }
 
 func helloPerson(ctx aero.Context) error {
-	return ctx.String("Hello " + ctx.Get("person"))
+	return ctx.String("Hello " + ctx.Get("person") + "!")
+}
+
+func goodmorningPerson(ctx aero.Context) error {
+	return ctx.String("Good morning " + ctx.Get("person") + "!")
 }
 
 func imageFile(ctx aero.Context) error {
@@ -85,6 +99,17 @@ func streamHello(ctx aero.Context) error {
 	}()
 
 	return ctx.Reader(reader)
+}
+
+func streamHelloSlow(ctx aero.Context) error {
+
+	var text string
+
+	for i := 0; i < 100000; i++ {
+		text += fmt.Sprintf("Hello\n")
+	}
+
+	return ctx.String(text)
 }
 
 func JSON(ctx aero.Context, value interface{}) error {
